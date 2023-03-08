@@ -30,7 +30,6 @@ from src.utils.torchtools import (
     resume_from_checkpoint,
 )
 from src.utils.visualtools import visualize_ranked_results
-
 # global variables
 parser = argument_parser()
 args = parser.parse_args()
@@ -45,7 +44,8 @@ def main():
     use_gpu = torch.cuda.is_available()
     if args.use_cpu:
         use_gpu = False
-    log_name = "log_test.txt" if args.evaluate else "log_train.txt"
+    today = str(datetime.datetime.today().date())
+    log_name = today + "_log_test.txt" if args.evaluate else today + "_log_train.txt"
     sys.stdout = Logger(osp.join(args.save_dir, log_name))
     print(f"==========\nArgs:{args}\n==========")
 
@@ -86,8 +86,6 @@ def main():
             args.resume, model, optimizer=optimizer
         )
 
-    best_rank = -1
-
     if args.evaluate:
         print("Evaluate only")
 
@@ -122,6 +120,7 @@ def main():
         print('Done. All layers are open to train for {} epochs'.format(args.max_epoch))
         optimizer.load_state_dict(initial_optim_state)
     """
+    best_rank = -1
     for epoch in range(args.start_epoch, args.max_epoch):
         train(
             epoch,
@@ -161,6 +160,7 @@ def main():
                 args.save_dir,
                 rank1 > best_rank
             )
+            best_rank = rank1 if rank1 > best_rank else best_rank
 
     elapsed = round(time.time() - time_start)
     elapsed = str(datetime.timedelta(seconds=elapsed))
@@ -210,7 +210,7 @@ def train(
         htri_losses.update(htri_loss.item(), pids.size(0))
         accs.update(accuracy(outputs, pids)[0])
 
-        if (batch_idx + 1) % args.print_freq == 0:
+        if (batch_idx + 1) % args.print_freq == 0 or batch_idx + 1 == len(trainloader):
             print(
                 "Epoch: [{0}][{1}/{2}]\t"
                 "Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t"

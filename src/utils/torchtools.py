@@ -9,6 +9,7 @@ import torch
 import torch.nn as nn
 
 from .iotools import mkdir_if_missing
+from datetime import datetime
 
 
 def save_checkpoint(state, save_dir, is_best=False, remove_module_from_keys=False):
@@ -23,12 +24,13 @@ def save_checkpoint(state, save_dir, is_best=False, remove_module_from_keys=Fals
             new_state_dict[k] = v
         state["state_dict"] = new_state_dict
     # save
+    today = str(datetime.today().date())
     epoch = state["epoch"]
-    fpath = osp.join(save_dir, "model.pth.tar-" + str(epoch))
+    fpath = osp.join(save_dir, today + "_model.pth.tar-" + str(epoch))
     torch.save(state, fpath)
     print(f'Checkpoint saved to "{fpath}"')
     if is_best:
-        shutil.copy(fpath, osp.join(osp.dirname(fpath), "best_model.pth.tar"))
+        shutil.copy(fpath, osp.join(osp.dirname(fpath), today + "_best_model.pth.tar"))
 
 
 def resume_from_checkpoint(ckpt_path, model, optimizer=None):

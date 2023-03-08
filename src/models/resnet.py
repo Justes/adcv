@@ -6,7 +6,7 @@ import torchvision
 from torch import nn
 from torch.nn import functional as F
 
-__all__ = ["resnet50", "resnet50_fc512"]
+__all__ = ["resnet18", "resnet34", "resnet50", "resnet50_fc512", "resnet101", "resnet152"]
 
 model_urls = {
     "resnet18": "https://download.pytorch.org/models/resnet18-5c106cde.pth",
@@ -265,6 +265,17 @@ resnet101: block=Bottleneck, layers=[3, 4, 23, 3]
 resnet152: block=Bottleneck, layers=[3, 8, 36, 3]
 """
 
+def resnet18():
+    return 
+
+def resnet34():
+    return
+
+def resnet101():
+    return
+
+def resnet152():
+    return 
 
 def resnet50(num_classes, loss={"xent"}, pretrained=True, **kwargs):
     model = ResNet(
