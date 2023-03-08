@@ -48,5 +48,5 @@ htri: triple loss (Hermans et al. In Defense of the Triplet Loss for Person Re-I
 --test-batch-size 100 \
 --evaluate \
 --print-freq 100 \
---load-weights logs/resnet50-veri/2023-03-08_best-model.pth.tar-2 \
+--load-weights logs/resnet50-veri/2023-03-08_best_model.pth.tar \
 --save-dir logs/resnet50-eval-veri
