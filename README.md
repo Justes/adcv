@@ -27,13 +27,13 @@ htri: triple loss (Hermans et al. In Defense of the Triplet Loss for Person Re-I
 --width 224 \
 --optim amsgrad \
 --lr 0.0003 \
---max-epoch 30 \
+--max-epoch 60 \
 --stepsize 20 40 \
 --train-batch-size 64 \
 --test-batch-size 100 \
---start-eval 15 \
---eval-freq 1 \
---print-freq 10 \
+--start-eval 20 \
+--eval-freq 5 \
+--print-freq 100 \
 --save-dir logs/resnet50-veri
 
 
