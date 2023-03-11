@@ -281,8 +281,21 @@ def resnet18(num_classes, loss={"xent"}, pretrained=True, **kwargs):
         init_pretrained_weights(model, model_urls["resnet18"])
     return model
 
-def resnet34():
-    return
+def resnet34(num_classes, loss={"xent"}, pretrained=True, **kwargs):
+    model = ResNet(
+        num_classes=num_classes,
+        loss=loss,
+        block=BasicBlock,
+        layers=[3, 4, 6, 3],
+        last_stride=2,
+        fc_dims=None,
+        dropout_p=None,
+        **kwargs,
+    )
+
+    if pretrained:
+        init_pretrained_weights(model, model_urls["resnet34"])
+    return model
 
 def resnet101():
     return
