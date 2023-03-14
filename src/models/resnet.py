@@ -297,11 +297,6 @@ def resnet34(num_classes, loss={"xent"}, pretrained=True, **kwargs):
         init_pretrained_weights(model, model_urls["resnet34"])
     return model
 
-def resnet101():
-    return
-
-def resnet152():
-    return 
 
 def resnet50(num_classes, loss={"xent"}, pretrained=True, **kwargs):
     model = ResNet(
@@ -332,4 +327,36 @@ def resnet50_fc512(num_classes, loss={"xent"}, pretrained=True, **kwargs):
     )
     if pretrained:
         init_pretrained_weights(model, model_urls["resnet50"])
+    return model
+
+
+def resnet101(num_classes, loss={"xent"}, pretrained=True, **kwargs):
+    model = ResNet(
+        num_classes=num_classes,
+        loss=loss,
+        block=Bottleneck,
+        layers=[3, 4, 23, 3],
+        last_stride=2,
+        fc_dims=None,
+        dropout_p=None,
+        **kwargs,
+    )
+    if pretrained:
+        init_pretrained_weights(model, model_urls["resnet101"])
+    return model
+
+
+def resnet152(num_classes, loss={"xent"}, pretrained=True, **kwargs):
+    model = ResNet(
+        num_classes=num_classes,
+        loss=loss,
+        block=Bottleneck,
+        layers=[3, 8, 36, 3],
+        last_stride=2,
+        fc_dims=None,
+        dropout_p=None,
+        **kwargs,
+    )
+    if pretrained:
+        init_pretrained_weights(model, model_urls["resnet152"])
     return model

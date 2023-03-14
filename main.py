@@ -47,6 +47,9 @@ def main():
     today = str(datetime.datetime.today().date())
     log_name = today + "_log_test.txt" if args.evaluate else today + "_log_train.txt"
     sys.stdout = Logger(osp.join(args.save_dir, log_name))
+    now = str(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+    print("***********************************************")
+    print(f"Running Time: {now}")
     print(f"==========\nArgs:{args}\n==========")
 
     if use_gpu:
@@ -166,6 +169,7 @@ def main():
     elapsed = str(datetime.timedelta(seconds=elapsed))
     print(f"Elapsed {elapsed}")
     ranklogger.show_summary()
+    print("***********************************************\n\n\n\n\n")
 
 
 def train(
@@ -317,6 +321,7 @@ def test(
     if return_distmat:
         return distmat
     return cmc[0]
+
 
 
 if __name__ == "__main__":
