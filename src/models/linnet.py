@@ -1,13 +1,15 @@
 import torch
 import torch.nn as nn
-from torchsummary import summary
+#from torchsummary import summary
 
 class LinNet(nn.Module):
 
     def __init__(self, num_classes, block, layers, *args):
         super().__init__()
         self.inplanes = 64
-        self.conv1 = nn.Conv2d(3, 32, 7, 2, 3)
+        #base
+        #self.conv1 = nn.Conv2d(3, 32, 7, 2, 3)
+        self.conv1 = nn.Conv2d(3, 32, 7, 1, 3)
         self.bn1 = nn.BatchNorm2d(32)
         self.relu = nn.ReLU(inplace=True)
         self.conv2 = nn.Conv2d(32, 64, 3, 1, 1)
@@ -36,6 +38,7 @@ class LinNet(nn.Module):
         x = self.conv1(x)
         x = self.bn1(x)
         x = self.relu(x)
+        x = self.maxpool(x)
         x = self.conv2(x)
         x = self.bn2(x)
         x = self.relu(x)

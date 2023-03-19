@@ -3,7 +3,8 @@
 python main.py \
 -s veri \
 -t veri \
--a linnet36 \
+-a linnet16 \
+--root ../datasets \
 --height 224 \
 --width 224 \
 --optim amsgrad \
@@ -13,6 +14,6 @@ python main.py \
 --train-batch-size 64 \
 --test-batch-size 100 \
 --start-eval 0 \
---eval-freq 5 \
+--eval-freq 1 \
 --print-freq 100 \
 --save-dir logs/linnet36-veri
