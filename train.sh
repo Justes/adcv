@@ -12,7 +12,7 @@ python main.py \
 --stepsize 20 40 \
 --train-batch-size 64 \
 --test-batch-size 100 \
---start-eval 25 \
+--start-eval 0 \
 --eval-freq 5 \
 --print-freq 100 \
 --save-dir logs/linnet36-veri

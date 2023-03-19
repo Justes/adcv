@@ -42,8 +42,15 @@ def main():
     if not args.use_avai_gpus:
         os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu_devices
     use_gpu = torch.cuda.is_available()
+    use_mps = torch.backends.mps.is_available()
+
     if args.use_cpu:
         use_gpu = False
+        use_mps = False
+
+    if use_mps:
+        mps_device = torch.device("mps")
+
     today = str(datetime.datetime.today().date())
     log_name = today + "_log_test.txt" if args.evaluate else today + "_log_train.txt"
     sys.stdout = Logger(osp.join(args.save_dir, log_name))
@@ -55,6 +62,8 @@ def main():
     if use_gpu:
         print(f"Currently using GPU {args.gpu_devices}")
         cudnn.benchmark = True
+    elif use_mps:
+        print(f"Currently using MPS acceleration")
     else:
         warnings.warn("Currently using CPU, however, GPU is highly recommended")
 
@@ -77,8 +86,12 @@ def main():
 
     model = nn.DataParallel(model).cuda() if use_gpu else model
 
+    if use_mps:
+        print("MPS accelerating")
+        model = model.to(mps_device)
+
     criterion_xent = CrossEntropyLoss(
-        num_classes=dm.num_train_pids, use_gpu=use_gpu, label_smooth=args.label_smooth
+        num_classes=dm.num_train_pids, use_gpu=use_gpu, label_smooth=args.label_smooth, use_mps=use_mps
     )
     criterion_htri = TripletLoss(margin=args.margin)
     optimizer = init_optimizer(model, **optimizer_kwargs(args))
@@ -133,6 +146,7 @@ def main():
             optimizer,
             trainloader,
             use_gpu,
+            use_mps,
         )
 
         scheduler.step()
@@ -149,7 +163,7 @@ def main():
                 print(f"Evaluating {name} ...")
                 queryloader = testloader_dict[name]["query"]
                 galleryloader = testloader_dict[name]["gallery"]
-                rank1 = test(model, queryloader, galleryloader, use_gpu)
+                rank1 = test(model, queryloader, galleryloader, use_gpu, use_mps)
                 ranklogger.write(name, epoch + 1, rank1)
 
             save_checkpoint(
@@ -173,13 +187,15 @@ def main():
 
 
 def train(
-    epoch, model, criterion_xent, criterion_htri, optimizer, trainloader, use_gpu
+    epoch, model, criterion_xent, criterion_htri, optimizer, trainloader, use_gpu, use_mps
 ):
     xent_losses = AverageMeter()
     htri_losses = AverageMeter()
     accs = AverageMeter()
     batch_time = AverageMeter()
     data_time = AverageMeter()
+    if use_mps:
+        mps_device = torch.device("mps")
 
     model.train()
     for p in model.parameters():
@@ -191,6 +207,8 @@ def train(
 
         if use_gpu:
             imgs, pids = imgs.cuda(), pids.cuda()
+        elif use_mps:
+            imgs, pids = imgs.to(mps_device), pids.to(mps_device)
 
         outputs, features = model(imgs)
         if isinstance(outputs, (tuple, list)):
@@ -213,6 +231,8 @@ def train(
         xent_losses.update(xent_loss.item(), pids.size(0))
         htri_losses.update(htri_loss.item(), pids.size(0))
         accs.update(accuracy(outputs, pids)[0])
+
+
 
         if (batch_idx + 1) % args.print_freq == 0 or batch_idx + 1 == len(trainloader):
             print(
@@ -241,10 +261,13 @@ def test(
     queryloader,
     galleryloader,
     use_gpu,
+    use_mps,
     ranks=[1, 5, 10, 20],
     return_distmat=False,
 ):
     batch_time = AverageMeter()
+    if use_mps:
+        mps_device = torch.device("mps")
 
     model.eval()
 
@@ -253,6 +276,8 @@ def test(
         for batch_idx, (imgs, pids, camids, _) in enumerate(queryloader):
             if use_gpu:
                 imgs = imgs.cuda()
+            elif use_mps:
+                imgs = imgs.to(mps_device)
 
             end = time.time()
             features = model(imgs)
@@ -276,6 +301,8 @@ def test(
         for batch_idx, (imgs, pids, camids, _) in enumerate(galleryloader):
             if use_gpu:
                 imgs = imgs.cuda()
+            elif use_mps:
+                imgs = imgs.to(mps_device)
 
             end = time.time()
             features = model(imgs)
