@@ -3,7 +3,7 @@
 python main.py \
 -s veri \
 -t veri \
--a resnet18 \
+-a linnet36 \
 --height 224 \
 --width 224 \
 --optim amsgrad \
@@ -15,4 +15,4 @@ python main.py \
 --start-eval 25 \
 --eval-freq 5 \
 --print-freq 100 \
---save-dir logs/resnet18-veri
+--save-dir logs/linnet36-veri

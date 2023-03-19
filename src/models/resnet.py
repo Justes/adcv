@@ -6,7 +6,7 @@ import torchvision
 from torch import nn
 from torch.nn import functional as F
 
-__all__ = ["resnet18", "resnet34", "resnet50", "resnet50_fc512", "resnet101", "resnet152"]
+__all__ = ["resnet18", "resnet18_fc256","resnet34", "resnet50", "resnet50_fc512", "resnet101", "resnet152"]
 
 model_urls = {
     "resnet18": "https://download.pytorch.org/models/resnet18-5c106cde.pth",
@@ -124,6 +124,13 @@ class ResNet(nn.Module):
 
         # backbone network
         self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3, bias=False)
+        """
+        self.conv1 = nn.Sequential(
+                nn.Conv2d(3, 16, 3, 1, 1),
+                nn.Conv2d(16, 32, 3, 1, 1),
+                nn.Conv2d(32, 64, 3, 2, 1)
+            )
+        """
         self.bn1 = nn.BatchNorm2d(64)
         self.relu = nn.ReLU(inplace=True)
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
@@ -273,6 +280,23 @@ def resnet18(num_classes, loss={"xent"}, pretrained=True, **kwargs):
         layers=[2, 2, 2, 2],
         last_stride=2,
         fc_dims=None,
+        dropout_p=None,
+        **kwargs,
+    )
+
+    if pretrained:
+        init_pretrained_weights(model, model_urls["resnet18"])
+    return model
+
+
+def resnet18_fc256(num_classes, loss={"xent"}, pretrained=True, **kwargs):
+    model = ResNet(
+        num_classes=num_classes,
+        loss=loss,
+        block=BasicBlock,
+        layers=[2, 2, 2, 2],
+        last_stride=1,
+        fc_dims=[256],
         dropout_p=None,
         **kwargs,
     )
