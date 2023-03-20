@@ -8,8 +8,8 @@ class LinNet(nn.Module):
         super().__init__()
         self.inplanes = 64
         #base
-        #self.conv1 = nn.Conv2d(3, 32, 7, 2, 3)
-        self.conv1 = nn.Conv2d(3, 32, 7, 1, 3)
+        self.conv1 = nn.Conv2d(3, 32, 7, 2, 3)
+        #self.conv1 = nn.Conv2d(3, 32, 7, 1, 3)
         self.bn1 = nn.BatchNorm2d(32)
         self.relu = nn.ReLU(inplace=True)
         self.conv2 = nn.Conv2d(32, 64, 3, 1, 1)
@@ -32,15 +32,15 @@ class LinNet(nn.Module):
         self.fc1 = nn.Linear(1024, 512)
         self.classifer = nn.Linear(512, num_classes)
 
-        self._init_params()
+        #self._init_params()
 
     def forward(self, x):
         x = self.conv1(x)
-        x = self.bn1(x)
+        #x = self.bn1(x)
         x = self.relu(x)
-        x = self.maxpool(x)
+        #x = self.maxpool(x)
         x = self.conv2(x)
-        x = self.bn2(x)
+        #x = self.bn2(x)
         x = self.relu(x)
         x = self.maxpool(x)
         x = self.layer1(x)
@@ -83,7 +83,7 @@ class LinNet(nn.Module):
                     stride=stride,
                     bias=False,
                 ),
-                nn.BatchNorm2d(planes * block.expansion),
+                #nn.BatchNorm2d(planes * block.expansion),
             )
 
         layers = []
@@ -92,7 +92,7 @@ class LinNet(nn.Module):
         for i in range(1, blocks):
             layers.append(nn.Sequential(
                     nn.Conv2d(planes * block.expansion, self.inplanes, 1, 1),
-                    nn.BatchNorm2d(self.inplanes),
+                    #nn.BatchNorm2d(self.inplanes),
                 ))
             layers.append(block(self.inplanes, planes * block.expansion, stride, downsample))
 
