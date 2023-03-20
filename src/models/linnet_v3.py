@@ -7,31 +7,30 @@ class LinNet(nn.Module):
     def __init__(self, num_classes, block, layers, *args):
         super().__init__()
         self.inplanes = 64
-
-        self.conv1 = nn.Conv2d(3, 32, 7, 2, 3)
+        self.conv1 = nn.Conv2d(3, 32, 7, 1, 3, bias=False)
         self.bn1 = nn.BatchNorm2d(32)
         self.relu = nn.ReLU(inplace=True)
-        self.conv2 = nn.Conv2d(32, 64, 3, 1, 1)
+        self.conv2 = nn.Conv2d(32, 64, 3, 1, 1, bias=False)
         self.bn2 = nn.BatchNorm2d(64)
         self.maxpool = nn.MaxPool2d(2, 2)
         self.layer1 = self._make_layer(block, 64, layers[0])
         self.layer2 = self._make_layer(block, 128, layers[1])
         self.layer3 = self._make_layer(block, 256, layers[2])
         self.layer4 = self._make_layer(block, 512, layers[3])
-        #self.layer5 = self._make_layer(block, 1024, layers[3])
 
         self.global_avgpool = nn.AdaptiveAvgPool2d(1)
         self.fc1 = nn.Linear(1024, 512)
         self.classifer = nn.Linear(512, num_classes)
 
-        #self._init_params()
+        self._init_params()
 
     def forward(self, x):
         x = self.conv1(x)
-        #x = self.bn1(x)
+        x = self.bn1(x)
         x = self.relu(x)
+        x = self.maxpool(x)
         x = self.conv2(x)
-        #x = self.bn2(x)
+        x = self.bn2(x)
         x = self.relu(x)
         x = self.maxpool(x)
         x = self.layer1(x)
@@ -41,8 +40,6 @@ class LinNet(nn.Module):
         x = self.layer3(x)
         x = self.maxpool(x)
         x = self.layer4(x)
-        #x = self.maxpool(x)
-        #x = self.layer5(x)
 
         x = self.global_avgpool(x)
         x = x.view(x.size(0), -1)
@@ -67,7 +64,7 @@ class LinNet(nn.Module):
                     stride=stride,
                     bias=False,
                 ),
-                #nn.BatchNorm2d(planes * block.expansion),
+                nn.BatchNorm2d(planes * block.expansion),
             )
 
         layers = []
@@ -75,8 +72,8 @@ class LinNet(nn.Module):
         
         for i in range(1, blocks):
             layers.append(nn.Sequential(
-                    nn.Conv2d(planes * block.expansion, self.inplanes, 1, 1),
-                    #nn.BatchNorm2d(self.inplanes),
+                    nn.Conv2d(planes * block.expansion, self.inplanes, 1, 1, bias=False),
+                    nn.BatchNorm2d(self.inplanes),
                 ))
             layers.append(block(self.inplanes, planes * block.expansion, stride, downsample))
 
@@ -91,16 +88,6 @@ class LinNet(nn.Module):
                 nn.init.kaiming_normal_(m.weight, mode="fan_out", nonlinearity="relu")
                 if m.bias is not None:
                     nn.init.constant_(m.bias, 0)
-            elif isinstance(m, nn.BatchNorm2d):
-                nn.init.constant_(m.weight, 1)
-                nn.init.constant_(m.bias, 0)
-            elif isinstance(m, nn.BatchNorm1d):
-                nn.init.constant_(m.weight, 1)
-                nn.init.constant_(m.bias, 0)
-            elif isinstance(m, nn.Linear):
-                nn.init.normal_(m.weight, 0, 0.01)
-                if m.bias is not None:
-                    nn.init.constant_(m.bias, 0)
 
 
 class Bottleneck(nn.Module):
@@ -108,11 +95,11 @@ class Bottleneck(nn.Module):
 
     def __init__(self, inc, outc, stride, downsample):
         super().__init__()
-        self.conv1 = nn.Conv2d(inc, outc, 3, 1, 1)
+        self.conv1 = nn.Conv2d(inc, outc, 3, 1, 1, bias=False)
         self.bn1 = nn.BatchNorm2d(outc)
-        self.conv2 = nn.Conv2d(outc, inc, 1)
+        self.conv2 = nn.Conv2d(outc, inc, 1, bias=False)
         self.bn2 = nn.BatchNorm2d(inc)
-        self.conv3 = nn.Conv2d(inc, outc, 3, 1, 1)
+        self.conv3 = nn.Conv2d(inc, outc, 3, 1, 1, bias=False)
         self.bn3 = nn.BatchNorm2d(outc)
         self.relu = nn.ReLU(inplace=True)
         self.downsample = downsample

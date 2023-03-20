@@ -17,6 +17,17 @@ xent: cross entropy loss
 htri: triple loss (Hermans et al. In Defense of the Triplet Loss for Person Re-Identification. arXiv:1703.07737)
 
 
+#Linnet-16
+
+base first conv 7*7, s=2, no init, use bn
+v1 first conv 7*7, s=2, no init, remove bn use bias
+v2 first conv 7*7, s=1, maxpool, no init, use bn
+v3 first conv 7*7, s=1, maxpool, use bn and conv use kaiming_normal
+
+# Data Augmentation
+
+utils/transforms.py
+
 # Train 
 !python main.py \
 -s veri \

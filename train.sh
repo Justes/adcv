@@ -14,6 +14,7 @@ python main.py \
 --train-batch-size 64 \
 --test-batch-size 100 \
 --start-eval 0 \
---eval-freq 1 \
+--eval-freq 5 \
 --print-freq 100 \
---save-dir logs/linnet36-veri
+--no-pretrained \
+--save-dir logs/linnet16-veri
