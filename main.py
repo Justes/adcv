@@ -110,7 +110,7 @@ def main():
             queryloader = testloader_dict[name]["query"]
             galleryloader = testloader_dict[name]["gallery"]
             distmat = test(
-                model, queryloader, galleryloader, use_gpu, return_distmat=True
+                model, queryloader, galleryloader, use_gpu, use_mps, return_distmat=True
             )
 
             if args.visualize_ranks:
