@@ -11,6 +11,7 @@ max-epoch = 60
 start-eval = 0 (start evaluate performance after this parameter)
 print-freq = 10 log print freqency, 10 batch print one log
 
+dataset_kwargs function in args.py add params
 
 # Loss
 xent: cross entropy loss

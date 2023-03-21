@@ -69,6 +69,7 @@ def main():
 
     print("Initializing image data manager")
     dm = ImageDataManager(use_gpu, **dataset_kwargs(args))
+
     trainloader, testloader_dict = dm.return_dataloaders()
 
     print(f"Initializing model: {args.arch}")

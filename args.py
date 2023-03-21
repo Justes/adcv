@@ -68,6 +68,17 @@ def argument_parser():
         action="store_true",
         help="randomly alter the intensities of RGB channels",
     )
+    parser.add_argument(
+        "--vertical-flip",
+        action="store_true",
+        help="randomly vertical flip",
+    )
+    parser.add_argument(
+        "--rotation",
+        type=int,
+        default=30,
+        help="randomly rotation degree",
+    )
 
     # ************************************************************
     # Optimization options
@@ -278,6 +289,8 @@ def dataset_kwargs(parsed_args):
         "random_erase": parsed_args.random_erase,
         "color_jitter": parsed_args.color_jitter,
         "color_aug": parsed_args.color_aug,
+        "vertical_flip": parsed_args.vertical_flip,
+        "rotation": parsed_args.rotation,
     }
 
 

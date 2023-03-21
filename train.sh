@@ -17,4 +17,9 @@ python main.py \
 --eval-freq 5 \
 --print-freq 100 \
 --no-pretrained \
+--random-erase \
+--color-jitter \
+--color-aug \
+--vertical-flip \
+--rotation 20 \
 --save-dir logs/linnet16-veri

@@ -25,6 +25,8 @@ class BaseDataManager:
         color_jitter=False,  # randomly change the brightness, contrast and saturation
         color_aug=False,  # randomly alter the intensities of RGB channels
         num_instances=4,  # number of instances per identity (for RandomIdentitySampler)
+        vertical_flip=False,
+        rotation=30,
         **kwargs,
     ):
         self.use_gpu = use_gpu
@@ -41,6 +43,8 @@ class BaseDataManager:
         self.color_jitter = color_jitter
         self.color_aug = color_aug
         self.num_instances = num_instances
+        self.vertical_flip = vertical_flip
+        self.rotation = rotation
 
         transform_train, transform_test = build_transforms(
             self.height,
@@ -48,6 +52,8 @@ class BaseDataManager:
             random_erase=self.random_erase,
             color_jitter=self.color_jitter,
             color_aug=self.color_aug,
+            vertical_flip=self.vertical_flip,
+            rotation=self.rotation,
         )
         self.transform_train = transform_train
         self.transform_test = transform_test

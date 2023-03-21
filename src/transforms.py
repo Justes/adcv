@@ -129,6 +129,8 @@ def build_transforms(
     random_erase=False,  # use random erasing for data augmentation
     color_jitter=False,  # randomly change the brightness, contrast and saturation
     color_aug=False,  # randomly alter the intensities of RGB channels
+    vertical_flip=False,
+    rotation=30,
     **kwargs
 ):
     # use imagenet mean and std as default
@@ -139,8 +141,21 @@ def build_transforms(
 
     # build train transformations
     transform_train = []
+
+    # add by lin
+    if rotation:
+        print('add rotation', rotation)
+        transform_train += [T.RandomRotation(rotation)]
+
     transform_train += [Random2DTranslation(height, width)]
     transform_train += [T.RandomHorizontalFlip()]
+
+    # add by lin
+    if vertical_flip:
+        print('add randomly vertical flip')
+        transform_train += [T.RandomVerticalFlip()]
+
+
     if color_jitter:
         transform_train += [
             T.ColorJitter(brightness=0.2, contrast=0.15, saturation=0, hue=0)
