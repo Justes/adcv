@@ -129,7 +129,7 @@ class Bottleneck(nn.Module):
 
 def linnet16(num_classes, pretrained=True, **kwargs):
     model = LinNet(num_classes=num_classes, block=Bottleneck, layers=[1, 1, 1, 1])
-    if pretrained:
+    if pretrained and kwargs.get("pretrained_model") != "":
         print(kwargs.get("pretrained_model", model_urls["linnet16"]))
         init_pretrained_weights(model, kwargs.get("pretrained_model", model_urls["linnet16"]))
     return model

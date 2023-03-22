@@ -160,7 +160,14 @@ def load_pretrained_weights(model, weight_path):
     - model (nn.Module): network model, which must not be nn.DataParallel
     - weight_path (str): path to pretrained weights
     """
-    checkpoint = torch.load(weight_path)
+    use_gpu = torch.cuda.is_available()
+    use_mps = torch.backends.mps.is_available()
+    if use_gpu:
+        checkpoint = torch.load(weight_path)
+    else:
+        device = 'mps' if use_mps else 'cpu'
+        checkpoint = torch.load(weight_path, map_location=torch.device(device))
+
     if "state_dict" in checkpoint:
         state_dict = checkpoint["state_dict"]
     else:
