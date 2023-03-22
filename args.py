@@ -204,6 +204,9 @@ def argument_parser():
     parser.add_argument(
         "--no-pretrained", action="store_true", help="do not load pretrained weights"
     )
+    parser.add_argument(
+        "--pretrained-model", type=str, default="", help="load pretrained model"
+    )
 
     # ************************************************************
     # Test settings

@@ -1,6 +1,11 @@
 import torch
 import torch.nn as nn
+import torch.utils.model_zoo as model_zoo
 #from torchsummary import summary
+
+model_urls = {
+    "linnet16": 'linnet16-pretrained-imagenet1k-best.pth'
+}
 
 class LinNet(nn.Module):
 
@@ -122,11 +127,34 @@ class Bottleneck(nn.Module):
         return self.relu(out)
 
 
-def linnet16(num_classes, **kwargs):
+def linnet16(num_classes, pretrained=True, **kwargs):
     model = LinNet(num_classes=num_classes, block=Bottleneck, layers=[1, 1, 1, 1])
+    if pretrained:
+        print(kwargs.get("pretrained_model", model_urls["linnet16"]))
+        init_pretrained_weights(model, kwargs.get("pretrained_model", model_urls["linnet16"]))
     return model
 
 def linnet19(num_classes, **kwargs):
     model = LinNet(num_classes=num_classes, block=Bottleneck, layers=[1, 1, 1, 1, 1])
     return model
 
+def init_pretrained_weights(model, model_url):
+    """
+    Initialize model with pretrained weights.
+    Layers that don't match with pretrained layers in name or size are kept unchanged.
+    """
+    #pretrain_dict = model_zoo.load_url(model_url)
+    use_mps = torch.backends.mps.is_available()
+    device = 'mps' if use_mps else 'cpu'
+    pretrained = torch.load(model_url, map_location=torch.device(device))
+    pretrain_dict = pretrained.state_dict()
+    print('Pretrained linnet16 loaded')
+    model_dict = model.state_dict()
+    pretrain_dict = {
+        k: v
+        for k, v in pretrain_dict.items()
+        if k in model_dict and model_dict[k].size() == v.size()
+    }
+    model_dict.update(pretrain_dict)
+    model.load_state_dict(model_dict)
+    print(f"Initialized model with pretrained weights from {model_url}")

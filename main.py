@@ -30,6 +30,8 @@ from src.utils.torchtools import (
     resume_from_checkpoint,
 )
 from src.utils.visualtools import visualize_ranked_results
+from src.models.linnet import LinNet, Bottleneck
+
 # global variables
 parser = argument_parser()
 args = parser.parse_args()
@@ -79,6 +81,7 @@ def main():
         loss={"xent", "htri"},
         pretrained=not args.no_pretrained,
         use_gpu=use_gpu,
+        pretrained_model=args.pretrained_model
     )
     print("Model size: {:.3f} M".format(count_num_param(model)))
 
@@ -349,7 +352,6 @@ def test(
     if return_distmat:
         return distmat
     return cmc[0]
-
 
 
 if __name__ == "__main__":

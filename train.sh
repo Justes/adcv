@@ -14,12 +14,10 @@ python main.py \
 --train-batch-size 64 \
 --test-batch-size 100 \
 --start-eval 0 \
---eval-freq 5 \
+--eval-freq 1 \
 --print-freq 100 \
---no-pretrained \
 --random-erase \
 --color-jitter \
 --color-aug \
---vertical-flip \
---rotation 20 \
+--pretrained-model linnet16-pretrained-imagenet1k-best.pth \
 --save-dir logs/linnet16-veri
