@@ -1,11 +1,13 @@
 import torch
 import torch.nn as nn
 import torch.utils.model_zoo as model_zoo
-#from torchsummary import summary
+
+# from torchsummary import summary
 
 model_urls = {
     "linnet16": 'linnet16-pretrained-imagenet1k-best.pth'
 }
+
 
 class LinNet(nn.Module):
 
@@ -56,10 +58,9 @@ class LinNet(nn.Module):
 
         return out, x
 
-
     def _make_layer(self, block, planes, blocks, stride=1):
         downsample = None
-        
+
         if stride != 1 or self.inplanes != planes * block.expansion:
             downsample = nn.Sequential(
                 nn.Conv2d(
@@ -74,18 +75,17 @@ class LinNet(nn.Module):
 
         layers = []
         layers.append(block(self.inplanes, planes * block.expansion, stride, downsample))
-        
+
         for i in range(1, blocks):
             layers.append(nn.Sequential(
-                    nn.Conv2d(planes * block.expansion, self.inplanes, 1, 1, bias=False),
-                    nn.BatchNorm2d(self.inplanes),
-                ))
+                nn.Conv2d(planes * block.expansion, self.inplanes, 1, 1, bias=False),
+                nn.BatchNorm2d(self.inplanes),
+            ))
             layers.append(block(self.inplanes, planes * block.expansion, stride, downsample))
 
         self.inplanes = planes * block.expansion
 
         return nn.Sequential(*layers)
-
 
     def _init_params(self):
         for m in self.modules():
@@ -122,7 +122,7 @@ class Bottleneck(nn.Module):
         x = self.relu(x)
         residual = self.downsample(residual)
 
-        out = residual + x 
+        out = residual + x
 
         return self.relu(out)
 
@@ -134,16 +134,21 @@ def linnet16(num_classes, pretrained=True, **kwargs):
         init_pretrained_weights(model, kwargs.get("pretrained_model", model_urls["linnet16"]))
     return model
 
-def linnet19(num_classes, **kwargs):
-    model = LinNet(num_classes=num_classes, block=Bottleneck, layers=[1, 1, 1, 1, 1])
+
+def linnet19(num_classes, pretrained=True, **kwargs):
+    model = LinNet(num_classes=num_classes, block=Bottleneck, layers=[1, 1, 1, 2])
+    if pretrained and kwargs.get("pretrained_model") != "":
+        print(kwargs.get("pretrained_model", model_urls["linnet16"]))
+        init_pretrained_weights(model, kwargs.get("pretrained_model", model_urls["linnet16"]))
     return model
+
 
 def init_pretrained_weights(model, model_url):
     """
     Initialize model with pretrained weights.
     Layers that don't match with pretrained layers in name or size are kept unchanged.
     """
-    #pretrain_dict = model_zoo.load_url(model_url)
+    # pretrain_dict = model_zoo.load_url(model_url)
     use_mps = torch.backends.mps.is_available()
     device = 'mps' if use_mps else 'cpu'
     pretrained = torch.load(model_url, map_location=torch.device(device))
