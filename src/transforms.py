@@ -130,7 +130,7 @@ def build_transforms(
     color_jitter=False,  # randomly change the brightness, contrast and saturation
     color_aug=False,  # randomly alter the intensities of RGB channels
     vertical_flip=False,
-    rotation=30,
+    rotation=0,
     **kwargs
 ):
     # use imagenet mean and std as default
