@@ -16,8 +16,8 @@ python main.py \
 --start-eval 0 \
 --eval-freq 1 \
 --print-freq 100 \
+--dropout 0.5 \
 --random-erase \
 --color-jitter \
 --color-aug \
---pretrained-model linnet16-pretrained-imagenet1k-best.pth \
 --save-dir logs/linnet16-veri

@@ -147,6 +147,9 @@ def argument_parser():
     parser.add_argument(
         "--test-batch-size", default=100, type=int, help="test batch size"
     )
+    parser.add_argument(
+        "--dropout", default=0, type=float, help="drop out probability"
+    )
 
     # ************************************************************
     # Learning rate scheduler options
@@ -312,6 +315,7 @@ def optimizer_kwargs(parsed_args):
         "rmsprop_alpha": parsed_args.rmsprop_alpha,
         "adam_beta1": parsed_args.adam_beta1,
         "adam_beta2": parsed_args.adam_beta2,
+        "dropout": parsed_args.dropout
     }
 
 

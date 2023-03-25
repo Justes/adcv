@@ -11,7 +11,7 @@ model_urls = {
 
 class LinNet(nn.Module):
 
-    def __init__(self, num_classes, block, layers, *args):
+    def __init__(self, num_classes, block, layers, dropout_p=0, *args):
         super().__init__()
         self.inplanes = 64
         self.conv1 = nn.Conv2d(3, 32, 7, 1, 3, bias=False)
@@ -27,6 +27,8 @@ class LinNet(nn.Module):
 
         self.global_avgpool = nn.AdaptiveAvgPool2d(1)
         self.fc1 = nn.Linear(1024, 512)
+        self.bn1d = nn.BatchNorm1d(512)
+        self.dropout = nn.Dropout(dropout_p)
         self.classifer = nn.Linear(512, num_classes)
 
         self._init_params()
@@ -51,6 +53,9 @@ class LinNet(nn.Module):
         x = self.global_avgpool(x)
         x = x.view(x.size(0), -1)
         x = self.fc1(x)
+        x = self.bn1d(x)
+        x = self.relu(x)
+        x = self.dropout(x)
         if not self.training:
             return x
 
@@ -127,8 +132,8 @@ class Bottleneck(nn.Module):
         return self.relu(out)
 
 
-def linnet16(num_classes, pretrained=True, **kwargs):
-    model = LinNet(num_classes=num_classes, block=Bottleneck, layers=[1, 1, 1, 1])
+def linnet16(num_classes, pretrained=True, dropout_p=0, **kwargs):
+    model = LinNet(num_classes=num_classes, block=Bottleneck, layers=[1, 1, 1, 1], dropout_p=dropout_p)
     if pretrained and kwargs.get("pretrained_model") != "":
         print(kwargs.get("pretrained_model", model_urls["linnet16"]))
         init_pretrained_weights(model, kwargs.get("pretrained_model", model_urls["linnet16"]))

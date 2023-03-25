@@ -18,6 +18,7 @@ def init_optimizer(
     staged_lr=False,  # different lr for different layers
     new_layers=None,  # new layers use the default lr, while other layers's lr is scaled by base_lr_mult
     base_lr_mult=0.1,  # learning rate multiplier for base layers
+    dropout=0, # dropout probability
 ):
     if staged_lr:
         assert new_layers is not None
