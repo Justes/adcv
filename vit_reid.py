@@ -84,6 +84,9 @@ def main():
         # print(model)
         print("Pretrained weight loaded")
 
+    if args.load_weights and check_isfile(args.load_weights):
+        load_pretrained_weights(model, args.load_weights)
+
     model = nn.DataParallel(model).cuda() if use_gpu else model
 
     if use_mps:
