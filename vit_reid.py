@@ -1,5 +1,3 @@
-# Copyright (c) EEEM071, University of Surrey
-
 import datetime
 import os
 import os.path as osp
@@ -30,7 +28,7 @@ from src.utils.torchtools import (
     resume_from_checkpoint,
 )
 from src.utils.visualtools import visualize_ranked_results
-from src.models.linnet import LinNet, Bottleneck
+from src.models.vision_transformer import vit_base_patch16_224, vit_base_patch16_224_in21k
 
 # global variables
 parser = argument_parser()
@@ -40,11 +38,9 @@ args = parser.parse_args()
 def main():
     global args
 
-    set_random_seed(args.seed)
-    if not args.use_avai_gpus:
-        os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu_devices
     use_gpu = torch.cuda.is_available()
     use_mps = torch.backends.mps.is_available()
+    device = 'cuda' if use_gpu else 'cpu'
 
     if args.use_cpu:
         use_gpu = False
@@ -70,24 +66,23 @@ def main():
         warnings.warn("Currently using CPU, however, GPU is highly recommended")
 
     print("Initializing image data manager")
+
     dm = ImageDataManager(use_gpu, **dataset_kwargs(args))
-
     trainloader, testloader_dict = dm.return_dataloaders()
+    num_classes = dm.num_train_pids
+    model = vit_base_patch16_224_in21k(num_classes)
+    if not args.no_pretrained:
+        state = torch.load(args.pretrained_model)
+        state.pop('head.weight')
+        state.pop('head.bias')
+        state.pop('pre_logits.fc.weight')
+        state.pop('pre_logits.fc.bias')
+        model.load_state_dict(state, strict=False)
 
-    print(f"Initializing model: {args.arch}")
-    model = models.init_model(
-        name=args.arch,
-        num_classes=dm.num_train_pids,
-        loss={"xent", "htri"},
-        pretrained=not args.no_pretrained,
-        use_gpu=use_gpu,
-        pretrained_model=args.pretrained_model,
-        dropout_p=args.dropout,
-    )
-    print("Model size: {:.3f} M".format(count_num_param(model)))
-
-    if args.load_weights and check_isfile(args.load_weights):
-        load_pretrained_weights(model, args.load_weights)
+        # for k, v in state.items():
+        #     print(k, v.shape)
+        # print(model)
+        print("Pretrained weight loaded")
 
     model = nn.DataParallel(model).cuda() if use_gpu else model
 
@@ -99,6 +94,7 @@ def main():
         num_classes=dm.num_train_pids, use_gpu=use_gpu, label_smooth=args.label_smooth, use_mps=use_mps
     )
     criterion_htri = TripletLoss(margin=args.margin)
+
     optimizer = init_optimizer(model, **optimizer_kwargs(args))
     scheduler = init_lr_scheduler(optimizer, **lr_scheduler_kwargs(args))
 
@@ -114,7 +110,7 @@ def main():
             print(f"Evaluating {name} ...")
             queryloader = testloader_dict[name]["query"]
             galleryloader = testloader_dict[name]["gallery"]
-            distmat = test(
+            distmat, mAP = test(
                 model, queryloader, galleryloader, use_gpu, use_mps, return_distmat=True
             )
 
@@ -130,17 +126,7 @@ def main():
     time_start = time.time()
     ranklogger = RankLogger(args.source_names, args.target_names)
     print("=> Start training")
-    """
-    if args.fixbase_epoch > 0:
-        print('Train {} for {} epochs while keeping other layers frozen'.format(args.open_layers, args.fixbase_epoch))
-        initial_optim_state = optimizer.state_dict()
 
-        for epoch in range(args.fixbase_epoch):
-            train(epoch, model, criterion_xent, criterion_htri, optimizer, trainloader, use_gpu, fixbase=True)
-
-        print('Done. All layers are open to train for {} epochs'.format(args.max_epoch))
-        optimizer.load_state_dict(initial_optim_state)
-    """
     best_rank = -1
     for epoch in range(args.start_epoch, args.max_epoch):
         train(
@@ -157,10 +143,10 @@ def main():
         scheduler.step()
 
         if (
-            (epoch + 1) > args.start_eval
-            and args.eval_freq > 0
-            and (epoch + 1) % args.eval_freq == 0
-            or (epoch + 1) == args.max_epoch
+                (epoch + 1) > args.start_eval
+                and args.eval_freq > 0
+                and (epoch + 1) % args.eval_freq == 0
+                or (epoch + 1) == args.max_epoch
         ):
             print("=> Test")
 
@@ -192,7 +178,7 @@ def main():
 
 
 def train(
-    epoch, model, criterion_xent, criterion_htri, optimizer, trainloader, use_gpu, use_mps
+        epoch, model, criterion_xent, criterion_htri, optimizer, trainloader, use_gpu, use_mps
 ):
     xent_losses = AverageMeter()
     htri_losses = AverageMeter()
@@ -232,10 +218,10 @@ def train(
         optimizer.step()
 
         batch_time.update(time.time() - end)
+
         xent_losses.update(xent_loss.item(), pids.size(0))
         htri_losses.update(htri_loss.item(), pids.size(0))
         accs.update(accuracy(outputs, pids)[0])
-
 
         if (batch_idx + 1) % args.print_freq == 0 or batch_idx + 1 == len(trainloader):
             print(
@@ -260,13 +246,13 @@ def train(
 
 
 def test(
-    model,
-    queryloader,
-    galleryloader,
-    use_gpu,
-    use_mps,
-    ranks=[1, 5, 10, 20],
-    return_distmat=False,
+        model,
+        queryloader,
+        galleryloader,
+        use_gpu,
+        use_mps,
+        ranks=[1, 5, 10, 20],
+        return_distmat=False,
 ):
     batch_time = AverageMeter()
     if use_mps:
@@ -331,8 +317,8 @@ def test(
 
     m, n = qf.size(0), gf.size(0)
     distmat = (
-        torch.pow(qf, 2).sum(dim=1, keepdim=True).expand(m, n)
-        + torch.pow(gf, 2).sum(dim=1, keepdim=True).expand(n, m).t()
+            torch.pow(qf, 2).sum(dim=1, keepdim=True).expand(m, n)
+            + torch.pow(gf, 2).sum(dim=1, keepdim=True).expand(n, m).t()
     )
     distmat.addmm_(qf, gf.t(), beta=1, alpha=-2)
     distmat = distmat.numpy()

@@ -12,7 +12,7 @@ def argument_parser():
     # Datasets (general)
     # ************************************************************
     parser.add_argument(
-        "--root", type=str, default="./datasets", help="root path to data directory"
+        "--root", type=str, default="../datasets", help="root path to data directory"
     )
     parser.add_argument(
         "-s",
