@@ -189,9 +189,6 @@ class VisionTransformer(nn.Module):
     def forward(self, x):
         x = self.forward_features(x)
 
-        if not self.training:
-            return x
-
         if self.head_dist is not None:
             x, x_dist = self.head(x[0]), self.head_dist(x[1])
             if self.training and not torch.jit.is_scripting():
@@ -199,8 +196,8 @@ class VisionTransformer(nn.Module):
             else:
                 return (x + x_dist) / 2
         else:
-            y = self.head(x)
-            return y, x
+            x = self.head(x)
+            return x
 
 
     # def forward(self, x):

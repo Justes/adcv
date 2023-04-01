@@ -75,9 +75,9 @@ def main():
         state = torch.load(args.pretrained_model)
         model.load_state_dict(state, strict=False)
 
-        for k, v in state.items():
-            print(k, v.shape)
-        print(model)
+        # for k, v in state.items():
+        #     print(k, v.shape)
+
         print("Pretrained weight loaded")
 
     if args.load_weights and check_isfile(args.load_weights):
