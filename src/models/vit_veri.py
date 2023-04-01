@@ -8,11 +8,11 @@ class VitVeri(nn.Module):
         super().__init__()
         self.in_planes = 768
         self.base = vit_base_patch16_224()
-        self.classifier = nn.Linear(self.in_planes, num_classes, bias=False)
-        self.classifier.apply(weights_init_classifier)
         self.bottleneck = nn.BatchNorm1d(self.in_planes)
         self.bottleneck.bias.requires_grad_(False)
         self.bottleneck.apply(weights_init_kaiming)
+        self.classifier = nn.Linear(self.in_planes, num_classes, bias=False)
+        self.classifier.apply(weights_init_classifier)
 
     def forward(self, x):
         base = self.base(x)

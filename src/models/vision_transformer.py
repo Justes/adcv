@@ -158,7 +158,7 @@ class VisionTransformer(nn.Module):
             self.has_logits = False
             self.pre_logits = nn.Identity()
 
-        self.head = nn.Linear(self.embed_dim, self.num_classes) if num_classes > 0 else nn.Identity()
+        self.head = nn.Linear(self.num_features, self.num_classes) if num_classes > 0 else nn.Identity()
         self.head_dist = None
         if distilled:
             self.head_dist = nn.Linear(self.embed_dim, self.num_classes) if num_classes > 0 else nn.Identity()
@@ -196,7 +196,7 @@ class VisionTransformer(nn.Module):
             else:
                 return (x + x_dist) / 2
         else:
-            x = self.head(x)
+            # x = self.head(x)
             return x
 
 
