@@ -76,7 +76,7 @@ def argument_parser():
     parser.add_argument(
         "--rotation",
         type=int,
-        default=10,
+        default=0,
         help="randomly rotation degree",
     )
 

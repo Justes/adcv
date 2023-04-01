@@ -28,7 +28,7 @@ from src.utils.torchtools import (
     resume_from_checkpoint,
 )
 from src.utils.visualtools import visualize_ranked_results
-from src.models.vision_transformer import vit_base_patch16_224, vit_base_patch16_224_in21k
+from src.models.vit_veri import vit_base_veri
 
 # global variables
 parser = argument_parser()
@@ -70,18 +70,14 @@ def main():
     dm = ImageDataManager(use_gpu, **dataset_kwargs(args))
     trainloader, testloader_dict = dm.return_dataloaders()
     num_classes = dm.num_train_pids
-    model = vit_base_patch16_224_in21k(num_classes)
-    if not args.no_pretrained:
+    model = vit_base_veri(num_classes)
+    if args.pretrained_model != "":
         state = torch.load(args.pretrained_model)
-        state.pop('head.weight')
-        state.pop('head.bias')
-        state.pop('pre_logits.fc.weight')
-        state.pop('pre_logits.fc.bias')
         model.load_state_dict(state, strict=False)
 
-        # for k, v in state.items():
-        #     print(k, v.shape)
-        # print(model)
+        for k, v in state.items():
+            print(k, v.shape)
+        print(model)
         print("Pretrained weight loaded")
 
     if args.load_weights and check_isfile(args.load_weights):
@@ -113,7 +109,7 @@ def main():
             print(f"Evaluating {name} ...")
             queryloader = testloader_dict[name]["query"]
             galleryloader = testloader_dict[name]["gallery"]
-            distmat, mAP = test(
+            distmat = test(
                 model, queryloader, galleryloader, use_gpu, use_mps, return_distmat=True
             )
 

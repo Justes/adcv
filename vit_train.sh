@@ -1,13 +1,13 @@
 #!/bin/bash
 
-python vit_reid.py \
+python vit_main.py \
 -s veri \
 -t veri \
 --root ../datasets \
 --height 224 \
 --width 224 \
 --optim amsgrad \
---lr 0.0003 \
+--lr 0.008 \
 --max-epoch 1 \
 --stepsize 20 40 \
 --train-batch-size 64 \
@@ -15,5 +15,5 @@ python vit_reid.py \
 --start-eval 0 \
 --eval-freq 1 \
 --print-freq 100 \
---pretrained-model ../pretrained/vit_base_patch16_224_in21k-e5005f0a.pth \
---save-dir logs/linnet16-veri
+--pretrained-model ../pretrained/jx_vit_base_p16_224-80ecf9dd.pth \
+--save-dir logs/vit-base
