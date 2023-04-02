@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from .vision_transformer import vit_base_patch16_224
+from .vision_transformer import vit_base_patch16_224, vit_base_patch16_224_in21k
 
 
 class VitVeri(nn.Module):
