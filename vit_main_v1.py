@@ -218,9 +218,9 @@ def train(
         loss.backward()
         optimizer.step()
         if isinstance(outputs, list):
-            acc = (outputs[0].max(1)[1] == pids).float().mean()
+            acc = (outputs[0].max(1)[1] == pids).float().mean() * 100
         else:
-            acc = (outputs.max(1)[1] == pids).float().mean()
+            acc = (outputs.max(1)[1] == pids).float().mean() * 100
 
         loss_meter.update(loss.item(), imgs.shape[0])
         accs.update(acc, 1)
@@ -252,7 +252,7 @@ def train(
                 "Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t"
                 "Data {data_time.val:.4f} ({data_time.avg:.4f})\t"
                 "Loss {loss.val:.4f} ({loss.avg:.4f})\t"
-                "Acc {acc.val:.4f} ({acc.avg:.4f})\t".format(
+                "Acc {acc.val:.2f} ({acc.avg:.2f})\t".format(
                     epoch + 1,
                     batch_idx + 1,
                     len(trainloader),
