@@ -143,7 +143,7 @@ def main():
             use_mps,
         )
 
-        scheduler.step()
+        scheduler.step(epoch)
 
         if (
                 (epoch + 1) > args.start_eval
