@@ -223,6 +223,7 @@ def train(
 
         loss_meter.update(loss.item(), imgs.shape[0])
         accs.update(acc, 1)
+        batch_time.update(time.time() - end)
         # if isinstance(outputs, (tuple, list)):
         #     xent_loss = DeepSupervision(criterion_xent, outputs, pids)
         # else:
@@ -250,7 +251,7 @@ def train(
                 "Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t"
                 "Data {data_time.val:.4f} ({data_time.avg:.4f})\t"
                 "Loss {loss.val:.4f} ({loss.avg:.4f})\t"
-                "Acc {acc.val:.2f} ({acc.avg:.2f})\t".format(
+                "Acc {acc.val:.4f} ({acc.avg:.4f})\t".format(
                     epoch + 1,
                     batch_idx + 1,
                     len(trainloader),
