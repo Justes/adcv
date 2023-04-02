@@ -28,6 +28,9 @@ from src.utils.torchtools import (
     resume_from_checkpoint,
 )
 from src.utils.visualtools import visualize_ranked_results
+from solver import make_optimizer
+from solver.scheduler_factory import create_scheduler
+from config import cfg
 from src.models.vit_veri import vit_base_veri
 
 # global variables
@@ -95,7 +98,8 @@ def main():
     criterion_htri = TripletLoss(margin=args.margin)
 
     optimizer = init_optimizer(model, **optimizer_kwargs(args))
-    scheduler = init_lr_scheduler(optimizer, **lr_scheduler_kwargs(args))
+    # scheduler = init_lr_scheduler(optimizer, **lr_scheduler_kwargs(args))
+    scheduler = create_scheduler(cfg, optimizer)
 
     if args.resume and check_isfile(args.resume):
         args.start_epoch = resume_from_checkpoint(
