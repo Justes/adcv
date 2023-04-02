@@ -79,19 +79,10 @@ def main():
     state_dict = {}
     if args.pretrained_model != "":
         state = torch.load(args.pretrained_model, map_location=torch.device('cpu'))
-        # for k, v in state.items():
-        #     print(k, v.shape)
-
         for k, v in state.items():
             ky = 'base.' + k
             state_dict[ky] = v
-            # print(ky, v.shape)
-        # state.pop('head.bias')
-        # state.pop('head.weight')
-        # state.pop('pre_logits.fc.bias')
-        # state.pop('pre_logits.fc.weight')
-        # for k, v in state1.items():
-        #     print(k, v.shape)
+
         model.load_state_dict(state_dict, strict=False)
         print("Pretrained weight loaded")
 
@@ -109,8 +100,12 @@ def main():
     )
     criterion_htri = TripletLoss(margin=args.margin)
 
-    optimizer = init_optimizer(model, **optimizer_kwargs(args))
-    scheduler = init_lr_scheduler(optimizer, **lr_scheduler_kwargs(args))
+    # optimizer = init_optimizer(model, **optimizer_kwargs(args))
+    # scheduler = init_lr_scheduler(optimizer, **lr_scheduler_kwargs(args))
+
+    loss_func, center_criterion = make_loss(cfg, num_classes=num_classes)
+    optimizer, optimizer_center = make_optimizer(cfg, model, center_criterion)
+    scheduler = create_scheduler(cfg, optimizer)
 
     if args.resume and check_isfile(args.resume):
         args.start_epoch = resume_from_checkpoint(
@@ -152,9 +147,10 @@ def main():
             trainloader,
             use_gpu,
             use_mps,
+            loss_func,
         )
 
-        scheduler.step()
+        scheduler.step(epoch)
 
         if (
                 (epoch + 1) > args.start_eval
@@ -192,11 +188,12 @@ def main():
 
 
 def train(
-        epoch, model, criterion_xent, criterion_htri, optimizer, trainloader, use_gpu, use_mps
+        epoch, model, criterion_xent, criterion_htri, optimizer, trainloader, use_gpu, use_mps, loss_func
 ):
     xent_losses = AverageMeter()
     htri_losses = AverageMeter()
     accs = AverageMeter()
+    loss_meter = AverageMeter()
     batch_time = AverageMeter()
     data_time = AverageMeter()
     if use_mps:
@@ -216,43 +213,71 @@ def train(
             imgs, pids = imgs.to(mps_device), pids.to(mps_device)
 
         outputs, features = model(imgs)
-
-        if isinstance(outputs, (tuple, list)):
-            xent_loss = DeepSupervision(criterion_xent, outputs, pids)
-        else:
-            xent_loss = criterion_xent(outputs, pids)
-
-        if isinstance(features, (tuple, list)):
-            htri_loss = DeepSupervision(criterion_htri, features, pids)
-        else:
-            htri_loss = criterion_htri(features, pids)
-
-        loss = args.lambda_xent * xent_loss + args.lambda_htri * htri_loss
+        loss = loss_func(outputs, features, pids)
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
+        if isinstance(outputs, list):
+            acc = (outputs[0].max(1)[1] == pids).float().mean()
+        else:
+            acc = (outputs.max(1)[1] == pids).float().mean()
+
+        loss_meter.update(loss.item(), imgs.shape[0])
+        accs.update(acc, 1)
         batch_time.update(time.time() - end)
-        xent_losses.update(xent_loss.item(), pids.size(0))
-        htri_losses.update(htri_loss.item(), pids.size(0))
-        accs.update(accuracy(outputs, pids)[0])
+        # if isinstance(outputs, (tuple, list)):
+        #     xent_loss = DeepSupervision(criterion_xent, outputs, pids)
+        # else:
+        #     xent_loss = criterion_xent(outputs, pids)
+        #
+        # if isinstance(features, (tuple, list)):
+        #     htri_loss = DeepSupervision(criterion_htri, features, pids)
+        # else:
+        #     htri_loss = criterion_htri(features, pids)
+        #
+        # loss = args.lambda_xent * xent_loss + args.lambda_htri * htri_loss
+        # optimizer.zero_grad()
+        # loss.backward()
+        # optimizer.step()
+        #
+        # batch_time.update(time.time() - end)
+        #
+        # xent_losses.update(xent_loss.item(), pids.size(0))
+        # htri_losses.update(htri_loss.item(), pids.size(0))
+        # accs.update(accuracy(outputs, pids)[0])
 
         if (batch_idx + 1) % args.print_freq == 0 or batch_idx + 1 == len(trainloader):
             print(
                 "Epoch: [{0}][{1}/{2}]\t"
                 "Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t"
                 "Data {data_time.val:.4f} ({data_time.avg:.4f})\t"
-                "Xent {xent.val:.4f} ({xent.avg:.4f})\t"
-                "Htri {htri.val:.4f} ({htri.avg:.4f})\t"
-                "Acc {acc.val:.2f} ({acc.avg:.2f})\t".format(
+                "Loss {loss.val:.4f} ({loss.avg:.4f})\t"
+                "Acc {acc.val:.4f} ({acc.avg:.4f})\t".format(
                     epoch + 1,
                     batch_idx + 1,
                     len(trainloader),
                     batch_time=batch_time,
                     data_time=data_time,
-                    xent=xent_losses,
-                    htri=htri_losses,
+                    loss=loss_meter,
                     acc=accs,
                 )
+
+            # print(
+            #     "Epoch: [{0}][{1}/{2}]\t"
+            #     "Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t"
+            #     "Data {data_time.val:.4f} ({data_time.avg:.4f})\t"
+            #     "Xent {xent.val:.4f} ({xent.avg:.4f})\t"
+            #     "Htri {htri.val:.4f} ({htri.avg:.4f})\t"
+            #     "Acc {acc.val:.2f} ({acc.avg:.2f})\t".format(
+            #         epoch + 1,
+            #         batch_idx + 1,
+            #         len(trainloader),
+            #         batch_time=batch_time,
+            #         data_time=data_time,
+            #         xent=xent_losses,
+            #         htri=htri_losses,
+            #         acc=accs,
+            #     )
             )
 
         end = time.time()
