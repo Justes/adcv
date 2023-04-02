@@ -75,13 +75,12 @@ def hard_example_mining(dist_mat, labels, return_inds=False):
     # shape [N, N]
     # is_pos = labels.expand(N, N).eq(labels.expand(N, N).t())
     # is_neg = labels.expand(N, N).ne(labels.expand(N, N).t())
-    #
+
     m = np.identity(N)
     is_pos = (m == 1)
     is_neg = (m == 0)
     is_pos = torch.tensor(is_pos)
     is_neg = torch.tensor(is_neg)
-    print(is_pos)
 
     # `dist_ap` means distance(anchor, positive)
     # both `dist_ap` and `relative_p_inds` with shape [N, 1]
