@@ -229,7 +229,7 @@ def train(
         #     xent_loss = criterion_xent(outputs, pids)
         #
         # if isinstance(features, (tuple, list)):
-        #     htri_loss = DeepSupervision(criterion_htri, features, pids)
+        #    htri_loss = DeepSupervision(criterion_htri, features, pids)
         # else:
         #     htri_loss = criterion_htri(features, pids)
         #

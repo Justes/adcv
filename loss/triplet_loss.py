@@ -1,5 +1,6 @@
 import torch
 from torch import nn
+import numpy as np
 
 
 def normalize(x, axis=-1):
@@ -65,16 +66,26 @@ def hard_example_mining(dist_mat, labels, return_inds=False):
       thus we can cope with all anchors in parallel.
     """
 
+    torch.set_printoptions(threshold=np.inf)
+
     assert len(dist_mat.size()) == 2
     assert dist_mat.size(0) == dist_mat.size(1)
     N = dist_mat.size(0)
 
     # shape [N, N]
-    is_pos = labels.expand(N, N).eq(labels.expand(N, N).t())
-    is_neg = labels.expand(N, N).ne(labels.expand(N, N).t())
+    # is_pos = labels.expand(N, N).eq(labels.expand(N, N).t())
+    # is_neg = labels.expand(N, N).ne(labels.expand(N, N).t())
+    #
+    m = np.identity(N)
+    is_pos = (m == 1)
+    is_neg = (m == 0)
+    is_pos = torch.tensor(is_pos)
+    is_neg = torch.tensor(is_neg)
+    print(is_pos)
 
     # `dist_ap` means distance(anchor, positive)
     # both `dist_ap` and `relative_p_inds` with shape [N, 1]
+
     dist_ap, relative_p_inds = torch.max(
         dist_mat[is_pos].contiguous().view(N, -1), 1, keepdim=True)
     # print(dist_mat[is_pos].shape)

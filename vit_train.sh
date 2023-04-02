@@ -11,7 +11,7 @@ python vit_main.py \
 --weight-decay 0.0001 \
 --max-epoch 1 \
 --stepsize 20 40 \
---train-batch-size 64 \
+--train-batch-size 8 \
 --test-batch-size 64 \
 --start-eval 0 \
 --eval-freq 1 \
