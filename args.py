@@ -168,6 +168,8 @@ def argument_parser():
         help="stepsize to decay learning rate",
     )
     parser.add_argument("--gamma", default=0.1, type=float, help="learning rate decay")
+    parser.add_argument("--warmup", default=5, type=float, help="warm up epoch")
+    parser.add_argument("--training-step", default=100, type=float, help="training step")
 
     # ************************************************************
     # Cross entropy loss-specific setting

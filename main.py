@@ -157,10 +157,10 @@ def main():
         scheduler.step()
 
         if (
-            (epoch + 1) > args.start_eval
-            and args.eval_freq > 0
-            and (epoch + 1) % args.eval_freq == 0
-            or (epoch + 1) == args.max_epoch
+                (epoch + 1) > args.start_eval
+                and args.eval_freq > 0
+                and (epoch + 1) % args.eval_freq == 0
+                or (epoch + 1) == args.max_epoch
         ):
             print("=> Test")
 
@@ -192,7 +192,7 @@ def main():
 
 
 def train(
-    epoch, model, criterion_xent, criterion_htri, optimizer, trainloader, use_gpu, use_mps
+        epoch, model, criterion_xent, criterion_htri, optimizer, trainloader, use_gpu, use_mps
 ):
     xent_losses = AverageMeter()
     htri_losses = AverageMeter()
@@ -236,7 +236,6 @@ def train(
         htri_losses.update(htri_loss.item(), pids.size(0))
         accs.update(accuracy(outputs, pids)[0])
 
-
         if (batch_idx + 1) % args.print_freq == 0 or batch_idx + 1 == len(trainloader):
             print(
                 "Epoch: [{0}][{1}/{2}]\t"
@@ -260,13 +259,13 @@ def train(
 
 
 def test(
-    model,
-    queryloader,
-    galleryloader,
-    use_gpu,
-    use_mps,
-    ranks=[1, 5, 10, 20],
-    return_distmat=False,
+        model,
+        queryloader,
+        galleryloader,
+        use_gpu,
+        use_mps,
+        ranks=[1, 5, 10, 20],
+        return_distmat=False,
 ):
     batch_time = AverageMeter()
     if use_mps:
@@ -331,8 +330,8 @@ def test(
 
     m, n = qf.size(0), gf.size(0)
     distmat = (
-        torch.pow(qf, 2).sum(dim=1, keepdim=True).expand(m, n)
-        + torch.pow(gf, 2).sum(dim=1, keepdim=True).expand(n, m).t()
+            torch.pow(qf, 2).sum(dim=1, keepdim=True).expand(m, n)
+            + torch.pow(gf, 2).sum(dim=1, keepdim=True).expand(n, m).t()
     )
     distmat.addmm_(qf, gf.t(), beta=1, alpha=-2)
     distmat = distmat.numpy()

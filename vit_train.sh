@@ -6,8 +6,8 @@ python vit_main.py \
 --root ../datasets \
 --height 224 \
 --width 224 \
---optim amsgrad \
---lr 0.008 \
+--optim sgd \
+--lr 0.0015 \
 --weight-decay 0.0001 \
 --max-epoch 1 \
 --stepsize 20 40 \

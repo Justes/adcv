@@ -9,12 +9,14 @@ import numpy as np
 import torch
 import torch.backends.cudnn as cudnn
 import torch.nn as nn
+import torch.optim as optim
 from args import argument_parser, dataset_kwargs, optimizer_kwargs, lr_scheduler_kwargs
 from src import models
 from src.data_manager import ImageDataManager
 from src.eval_metrics import evaluate
 from src.losses import CrossEntropyLoss, TripletLoss, DeepSupervision
-from src.lr_schedulers import init_lr_scheduler
+from src.lr_schedulers import init_lr_scheduler, get_polynomial_decay_schedule_with_warmup, \
+    get_cosine_schedule_with_warmup, cosine_scheduler
 from src.optimizers import init_optimizer
 from src.utils.avgmeter import AverageMeter
 from src.utils.generaltools import set_random_seed
@@ -110,7 +112,9 @@ def main():
     criterion_htri = TripletLoss(margin=args.margin)
 
     optimizer = init_optimizer(model, **optimizer_kwargs(args))
-    scheduler = init_lr_scheduler(optimizer, **lr_scheduler_kwargs(args))
+    # scheduler = init_lr_scheduler(optimizer, **lr_scheduler_kwargs(args))
+    # scheduler = cosine_scheduler(optimizer, args.training_step, args.lr, args.warmup)
+    scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, args.training_step)
 
     if args.resume and check_isfile(args.resume):
         args.start_epoch = resume_from_checkpoint(
@@ -216,7 +220,6 @@ def train(
             imgs, pids = imgs.to(mps_device), pids.to(mps_device)
 
         outputs, features = model(imgs)
-
         if isinstance(outputs, (tuple, list)):
             xent_loss = DeepSupervision(criterion_xent, outputs, pids)
         else:
@@ -229,8 +232,10 @@ def train(
 
         loss = args.lambda_xent * xent_loss + args.lambda_htri * htri_loss
         optimizer.zero_grad()
+        print(loss)
         loss.backward()
         optimizer.step()
+
         batch_time.update(time.time() - end)
         xent_losses.update(xent_loss.item(), pids.size(0))
         htri_losses.update(htri_loss.item(), pids.size(0))
@@ -243,7 +248,8 @@ def train(
                 "Data {data_time.val:.4f} ({data_time.avg:.4f})\t"
                 "Xent {xent.val:.4f} ({xent.avg:.4f})\t"
                 "Htri {htri.val:.4f} ({htri.avg:.4f})\t"
-                "Acc {acc.val:.2f} ({acc.avg:.2f})\t".format(
+                "Acc {acc.val:.2f} ({acc.avg:.2f})\t"
+                "Lr {lr.val}\t".format(
                     epoch + 1,
                     batch_idx + 1,
                     len(trainloader),
@@ -252,6 +258,7 @@ def train(
                     xent=xent_losses,
                     htri=htri_losses,
                     acc=accs,
+                    lr=optimizer.state_dict()['param_groups'][0]['lr']
                 )
             )
 
