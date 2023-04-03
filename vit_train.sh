@@ -7,7 +7,7 @@ python vit_main.py \
 --height 224 \
 --width 224 \
 --optim sgd \
---lr 0.0015 \
+--lr 0.008 \
 --weight-decay 0.0001 \
 --max-epoch 1 \
 --stepsize 20 40 \

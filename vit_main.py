@@ -232,7 +232,6 @@ def train(
 
         loss = args.lambda_xent * xent_loss + args.lambda_htri * htri_loss
         optimizer.zero_grad()
-        print(loss)
         loss.backward()
         optimizer.step()
 
