@@ -257,7 +257,7 @@ def train(
                     xent=xent_losses,
                     htri=htri_losses,
                     acc=accs,
-                    lr=optimizer.state_dict()['param_groups'][0]['lr']
+                    lr=optimizer.param_groups[0]['lr']
                 )
             )
 
