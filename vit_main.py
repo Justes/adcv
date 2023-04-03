@@ -156,6 +156,7 @@ def main():
             trainloader,
             use_gpu,
             use_mps,
+            scheduler,
         )
 
         scheduler.step()
@@ -196,7 +197,7 @@ def main():
 
 
 def train(
-        epoch, model, criterion_xent, criterion_htri, optimizer, trainloader, use_gpu, use_mps
+        epoch, model, criterion_xent, criterion_htri, optimizer, trainloader, use_gpu, use_mps, scheduler
 ):
     xent_losses = AverageMeter()
     htri_losses = AverageMeter()
@@ -257,7 +258,7 @@ def train(
                     xent=xent_losses,
                     htri=htri_losses,
                     acc=accs,
-                    lr=optimizer.param_groups[0]['lr']
+                    lr=scheduler.get_last_lr()[0],
                 )
             )
 
