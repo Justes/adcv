@@ -249,7 +249,7 @@ def train(
                 "Xent {xent.val:.4f} ({xent.avg:.4f})\t"
                 "Htri {htri.val:.4f} ({htri.avg:.4f})\t"
                 "Acc {acc.val:.2f} ({acc.avg:.2f})\t"
-                "Lr {lr.val}\t".format(
+                "Lr {lr}\t".format(
                     epoch + 1,
                     batch_idx + 1,
                     len(trainloader),
