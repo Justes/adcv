@@ -245,9 +245,10 @@ def train(
         htri_losses.update(htri_loss.item(), pids.size(0))
         accs.update(accuracy(outputs, pids)[0])
 
-        lr_tmp = scheduler.get_last_lr()[0]
         if sche == 'cosine_warmup':
             lr_tmp = scheduler._get_lr(epoch)[0]
+        else:
+            lr_tmp = scheduler.get_last_lr()[0]
 
         if (batch_idx + 1) % args.print_freq == 0 or batch_idx + 1 == len(trainloader):
             print(
