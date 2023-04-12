@@ -160,9 +160,10 @@ def main():
             use_gpu,
             use_mps,
             scheduler,
+            args.sche,
         )
 
-        scheduler.step()
+        scheduler.step(epoch)
 
         if (
                 (epoch + 1) > args.start_eval
@@ -200,7 +201,7 @@ def main():
 
 
 def train(
-        epoch, model, criterion_xent, criterion_htri, optimizer, trainloader, use_gpu, use_mps, scheduler
+        epoch, model, criterion_xent, criterion_htri, optimizer, trainloader, use_gpu, use_mps, scheduler, sche
 ):
     xent_losses = AverageMeter()
     htri_losses = AverageMeter()
@@ -244,6 +245,10 @@ def train(
         htri_losses.update(htri_loss.item(), pids.size(0))
         accs.update(accuracy(outputs, pids)[0])
 
+        lr_tmp = scheduler.get_last_lr()[0]
+        if sche == 'cosine_warmup':
+            lr_tmp = scheduler._get_lr(epoch)[0]
+
         if (batch_idx + 1) % args.print_freq == 0 or batch_idx + 1 == len(trainloader):
             print(
                 "Epoch: [{0}][{1}/{2}]\t"
@@ -261,7 +266,7 @@ def train(
                     xent=xent_losses,
                     htri=htri_losses,
                     acc=accs,
-                    lr=scheduler.get_last_lr()[0],
+                    lr=lr_tmp,
                 )
             )
 
