@@ -1,7 +1,7 @@
 # Copyright (c) EEEM071, University of Surrey
 import math
 import torch
-from torch.optim.lr_scheduler import LambdaLR
+from torch.optim.lr_scheduler import LambdaLR, CosineAnnealingLR
 from solver.cosine_lr import CosineLRScheduler
 
 
@@ -54,7 +54,11 @@ def get_cosine_schedule_with_warmup(optimizer, num_warmup_steps=5,
     return LambdaLR(optimizer, lr_lambda, last_epoch)
 
 
-def cosine_scheduler(optimizer, max_epoch, base_lr, warmup):
+def cosine_scheduler(optimizer, training_step):
+    return CosineAnnealingLR(optimizer, training_step)
+
+
+def cosine_scheduler_with_warmup(optimizer, max_epoch, base_lr, warmup):
     # num_epochs = cfg.SOLVER.MAX_EPOCHS
     # type 1
     # lr_min = 0.01 * cfg.SOLVER.BASE_LR

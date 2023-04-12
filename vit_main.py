@@ -15,8 +15,7 @@ from src import models
 from src.data_manager import ImageDataManager
 from src.eval_metrics import evaluate
 from src.losses import CrossEntropyLoss, TripletLoss, DeepSupervision
-from src.lr_schedulers import init_lr_scheduler, get_polynomial_decay_schedule_with_warmup, \
-    get_cosine_schedule_with_warmup, cosine_scheduler
+from src.lr_schedulers import init_lr_scheduler, cosine_scheduler, cosine_scheduler_with_warmup
 from src.optimizers import init_optimizer
 from src.utils.avgmeter import AverageMeter
 from src.utils.generaltools import set_random_seed
@@ -44,6 +43,7 @@ args = parser.parse_args()
 def main():
     global args
 
+    set_random_seed(args.seed)
     use_gpu = torch.cuda.is_available()
     use_mps = torch.backends.mps.is_available()
     device = 'cuda' if use_gpu else 'cpu'
@@ -112,9 +112,12 @@ def main():
     criterion_htri = TripletLoss(margin=args.margin)
 
     optimizer = init_optimizer(model, **optimizer_kwargs(args))
-    # scheduler = init_lr_scheduler(optimizer, **lr_scheduler_kwargs(args))
-    # scheduler = cosine_scheduler(optimizer, args.training_step, args.lr, args.warmup)
-    scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, args.training_step)
+    scheduler = init_lr_scheduler(optimizer, **lr_scheduler_kwargs(args))
+
+    if args.sche == 'cosine':
+        scheduler = cosine_scheduler(optimizer, args.training_step)
+    elif args.sche == 'cosine_warmup':
+        scheduler = cosine_scheduler_with_warmup(optimizer, args.training_step, args.lr, args.warmup)
 
     if args.resume and check_isfile(args.resume):
         args.start_epoch = resume_from_checkpoint(
