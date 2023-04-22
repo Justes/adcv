@@ -1,7 +1,8 @@
 # Copyright (c) EEEM071, University of Surrey
 
 from .resnet import resnet18, resnet18_fc256, resnet34, resnet50, resnet50_fc512, resnet101, resnet152
-from .linnet import linnet16, linnet19
+from .linnet import linnet16
+from .tvmodels import mobilenet_v3_small, vgg16, alexnet, googlenet
 
 __model_factory = {
     # image classification models
@@ -12,8 +13,11 @@ __model_factory = {
     "resnet50_fc512": resnet50_fc512,
     "resnet101": resnet101,
     "resnet152": resnet152,
-    "linnet16": linnet16,
-    "linnet19": linnet19
+    "mobilenet_v3_small": mobilenet_v3_small,
+    "vgg16": vgg16,
+    "alexnet": alexnet,
+    "googlenet": googlenet,
+    "linnet16": linnet16
 }
 
 

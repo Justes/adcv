@@ -3,7 +3,7 @@
 python main.py \
 -s veri \
 -t veri \
--a linnet16 \
+-a vgg16 \
 --root ../datasets \
 --height 224 \
 --width 224 \
@@ -16,8 +16,7 @@ python main.py \
 --start-eval 0 \
 --eval-freq 1 \
 --print-freq 100 \
---dropout 0.5 \
 --random-erase \
 --color-jitter \
 --color-aug \
---save-dir logs/linnet16-veri
+--save-dir logs/vgg16-veri

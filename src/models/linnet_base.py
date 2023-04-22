@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-#from torchsummary import summary
+from torchsummary import summary
 
 class LinNet(nn.Module):
 
@@ -142,4 +142,6 @@ def linnet19(num_classes, **kwargs):
     model = LinNet(num_classes=num_classes, block=Bottleneck, layers=[1, 1, 1, 1, 1])
     return model
 
-
+if __name__ == "__main__":
+    model = linnet16(40)
+    summary(model, (3, 224, 224))
