@@ -1,6 +1,6 @@
 # Copyright (c) EEEM071, University of Surrey
 
-from .resnet import resnet18, resnet18_fc256, resnet34, resnet50, resnet50_fc512, resnet101, resnet152
+from .resnet import resnet18, resnet18_fc256, resnet18_fc512, resnet34, resnet34_fc512, resnet50, resnet50_fc512, resnet101, resnet152
 from .linnet import linnet16
 from .tvmodels import mobilenet_v3_small, vgg16, alexnet, googlenet
 
@@ -8,7 +8,9 @@ __model_factory = {
     # image classification models
     "resnet18": resnet18,
     "resnet18_fc256": resnet18_fc256,
+    "resnet18_fc512": resnet18_fc512,
     "resnet34": resnet34,
+    "resnet34_fc512": resnet34_fc512,
     "resnet50": resnet50,
     "resnet50_fc512": resnet50_fc512,
     "resnet101": resnet101,
