@@ -78,14 +78,10 @@ def init_pretrained_weights(model, model_url):
     use_mps = torch.backends.mps.is_available()
     device = 'mps' if use_mps else 'cpu'
     pretrain_dict = torch.load(model_url, map_location=torch.device(device))
-    for k, v in pretrain_dict.items():
-        print(k, v.shape)
 
     #pretrain_dict = pretrained.state_dict()
     print('Pretrained model loaded')
     model_dict = model.state_dict()
-    for k, v in model_dict.items():
-        print(k, v.shape)
 
     pretrain_dict = {
         k: v
