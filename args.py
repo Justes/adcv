@@ -256,7 +256,7 @@ def argument_parser():
         help="resume from a checkpoint",
     )
     parser.add_argument(
-        "--save-dir", type=str, default="log", help="path to save log and model weights"
+        "--save-dir", type=str, default="logs", help="path to save log and model weights"
     )
     parser.add_argument("--use-cpu", action="store_true", help="use cpu")
     parser.add_argument(

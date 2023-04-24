@@ -3,7 +3,7 @@
 python main.py \
 -s veri \
 -t veri \
--a resnet18_fc512 \
+-a alexnet \
 --root ../datasets \
 --height 224 \
 --width 224 \
@@ -19,5 +19,5 @@ python main.py \
 --random-erase \
 --color-jitter \
 --color-aug \
---use-cpu \
---save-dir logs/resnet18_fc512-veri
+--pretrained-model ../pretrained/alexnet-7be5be79.pth \
+--save-dir logs/alexnet-veri

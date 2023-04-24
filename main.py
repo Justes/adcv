@@ -81,7 +81,7 @@ def main():
         loss={"xent", "htri"},
         pretrained=not args.no_pretrained,
         use_gpu=use_gpu,
-        # pretrained_model=args.pretrained_model,
+        pretrained_model=args.pretrained_model,
         # dropout_p=args.dropout,
     )
     print("Model size: {:.3f} M".format(count_num_param(model)))

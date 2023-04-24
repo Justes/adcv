@@ -2,7 +2,8 @@
 
 from .resnet import resnet18, resnet18_fc256, resnet18_fc512, resnet34, resnet34_fc512, resnet50, resnet50_fc512, resnet101, resnet152
 from .linnet import linnet16
-from .tvmodels import mobilenet_v3_small, vgg16, alexnet, googlenet
+from .tvmodels import mobilenet_v3_small, vgg16, googlenet
+from .alexnet import alexnet
 
 __model_factory = {
     # image classification models
