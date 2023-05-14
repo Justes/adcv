@@ -1,4 +1,4 @@
-# Course Work EEEM071 (2023 Spring)
+# Advanced Computer Vision
 
 
 # entry main.py
